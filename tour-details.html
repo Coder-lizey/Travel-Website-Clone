@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Tour Booking & Details | Traveling</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=Jura:wght@500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* Force Jost font globally */
+        * { 
+            font-family: 'Jost', sans-serif !important; 
+        }
+
+        body { 
+            background: #f8f9fa; 
+            color: #2b2b2b; 
+        }
+
+        .details-page-wrapper { padding: 40px 0; }
+        .details-main-card { 
+            background: #fff; 
+            border-radius: 24px; 
+            overflow: hidden; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05); 
+        }
+
+        /* PREMIUM AUTOMATIC FADE SLIDER BANNER */
+        .tour-images-slider-banner {
+            position: relative;
+            width: 100%;
+            height: 480px; /* Cinematic Viewport Height */
+            background: #000;
+            overflow: hidden;
+        }
+        
+        /* Slide structures */
+        .slide-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out; /* Smooth fade effect */
+            z-index: 1;
+        }
+        
+        .slide-item.active {
+            opacity: 0.85; /* Active slide visible and slightly dark for text clarity */
+            z-index: 2;
+        }
+
+        .slide-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Floating Text Content Layer Over Slider */
+        .floating-banner-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 30%, rgba(0,0,0,0));
+            padding: 60px 40px 35px 40px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 20px;
+            z-index: 10; /* Keep it always on top of running slides */
+        }
+        
+        .floating-banner-content h1 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .tour-meta-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .tour-meta-info span {
+    display: inline-flex;  /* Behaves properly with text nodes */
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    backdrop-filter: blur(5px);
+    font-weight: 500;
+}
+        .icon-gold { color: #ffc107; font-size: 18px; }
+        .badge-date-top {
+            background: #ffc107;
+            color: #000;
+            padding: 10px 28px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(255,193,7,0.3);
+        }
+
+        /* Layout Grid Split Setup */
+        .page-split-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+        }
+        .left-content-area {
+            padding: 45px;
+            background: #ffffff;
+            border-right: 1px solid #f0f0f0;
+        }
+        .right-sidebar-area {
+            padding: 45px;
+            background: #fafafa;
+        }
+
+        /* Navigation Tabs */
+        .tabs-nav {
+            display: flex;
+            gap: 35px;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 35px;
+        }
+        .tab-trigger {
+            background: none;
+            border: none;
+            font-weight: 700;
+            color: #999;
+            padding: 12px 0;
+            cursor: pointer;
+            position: relative;
+            font-size: 1.15rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+        .tab-trigger:hover, .tab-trigger.active {
+            color: #1a1a1a;
+        }
+        .tab-trigger.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #ffc107;
+            border-radius: 2px;
+        }
+        .inner-tab { display: none; }
+        .inner-tab.active { display: block; animation: fadeInSmooth 0.4s ease; }
+
+        /* Timeline Components */
+        .timeline-wrapper {
+            border-left: 3px solid #ffc107;
+            padding-left: 35px;
+            margin-left: 20px;
+        }
+        .timeline-item { position: relative; margin-bottom: 40px; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-badge {
+            position: absolute;
+            left: -67px;
+            top: -2px;
+            background: #1a1a1a;
+            color: #ffc107;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid #ffc107;
+        }
+        .timeline-panel h4 { font-size: 1.3rem; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+        .timeline-panel p { font-size: 15px; color: #555; line-height: 1.7; margin: 0; }
+
+        /* Services Item Layout */
+        .services-list { display: flex; flex-direction: column; gap: 15px; }
+        .service-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15.5px;
+            padding: 12px 18px;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            border-left: 4px solid #ddd;
+        }
+        .service-item.inclusive { border-left-color: #4caf50; }
+        .service-item.inclusive span { color: #4caf50; }
+        .service-item.exclusive { border-left-color: #e85d5d; color: #666; }
+        .service-item.exclusive span { color: #e85d5d; }
+
+        /* Sidebar Registration Card Desk */
+        .premium-booking-sidebar-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.04);
+            border: 1px solid #eaeaea;
+            position: sticky;
+            top: 20px;
+        }
+        .sidebar-form-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-left: 4px solid #ffc107;
+            padding-left: 10px;
+        }
+        .live-price-box {
+            background: #faf6eb;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .live-price-box p { margin: 0; font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .live-price-box h2 { 
+            font-family: 'Jura', sans-serif !important;
+            font-size: 2.3rem; 
+            font-weight: 700; 
+            color: #1a1a1a; 
+            margin: 5px 0; 
+        }
+        .live-price-box small { font-size: 0.85rem; color: #888; font-weight: 500; }
+
+        .form-label-custom {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .premium-input-style {
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            font-size: 14.5px;
+            background: #fcfcfc;
+            transition: all 0.3s ease;
+        }
+        .premium-input-style:focus {
+            background: #fff;
+            border-color: #ffc107;
+            box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.15);
+            outline: none;
+        }
+        .btn-submit-booking {
+            background: #1a1a1a;
+            color: #ffc107 !important;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .btn-submit-booking:hover {
+            background: #ffc107;
+            color: #000 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255,193,7,0.25);
+        }
+
+        @keyframes fadeInSmooth {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 992px) {
+            .tour-images-slider-banner { height: 350px; }
+            .floating-banner-content { padding: 30px 20px; }
+            .floating-banner-content h1 { font-size: 2.2rem; }
+            .page-split-grid { grid-template-columns: 1fr; }
+            .left-content-area { border-right: none; padding: 30px 20px; }
+            .right-sidebar-area { padding: 10px 20px 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container details-page-wrapper">
+    <div class="details-main-card">
+        
+        <div class="tour-images-slider-banner" id="sliderContainer">
+            <div class="slide-item active"><img id="slideImg1" src="Images/skardu.jpg" alt="View 1"></div>
+            <div class="slide-item"><img id="slideImg2" src="Images/fairyMeadows.jpg" alt="View 2"></div>
+            <div class="slide-item"><img id="slideImg3" src="Images/itlay.avif" alt="View 3"></div>
+
+            <div class="floating-banner-content">
+    <div>
+        <h1 id="displayTourTitle">Maree Summer Tour</h1>
+        <div class="tour-meta-info">
+            <span><span class="material-symbols-outlined icon-gold">calendar_month</span> <span id="displayDuration">5 Days & 4 Nights</span></span>
+            <span><span class="material-symbols-outlined icon-gold">star</span> 4.9 Reviews Rating</span>
+            <span><span class="material-symbols-outlined icon-gold">verified_user</span> 100% Certified Tour</span>
+        </div>
+    </div>
+    <div>
+        <div class="badge-date-top">June - July Active</div>
+    </div>
+</div>
+        </div>
+
+        <div class="page-split-grid">
+            
+            <div class="left-content-area">
+                <div class="tabs-nav">
+                    <button class="tab-trigger active" onclick="toggleDetailsTab(event, 'itineraryPanel')">Detailed Itinerary</button>
+                    <button class="tab-trigger" onclick="toggleDetailsTab(event, 'servicesPanel')">Inclusions & Services</button>
+                </div>
+
+                <div id="itineraryPanel" class="inner-tab active">
+                    <div class="timeline-wrapper">
+                        <div class="timeline-item">
+                            <div class="timeline-badge">Day 1</div>
+                            <div class="timeline-panel">
+                                <h4>Departure & Departure Logistics</h4>
+                                <p>Luxury execution setup through our private dedicated tourist coaster. High-quality road breaks on scenic mountain edges. Safe arrive-check in at our standard partners resort followed by traditional hot food greetings.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-badge">Day 2</div>
+                            <div class="timeline-panel">
+                                <h4>Local Architecture Exploration & Valleys</h4>
+                                <p>Full day premium visual transit trip covering historic architecture, lakes, and cultural spaces with professional certified tour supervisors guiding the history loops.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-badge">Day 3</div>
+                            <div class="timeline-panel">
+                                <h4>High Mountain Adventure & Outdoor Camping</h4>
+                                <p>Unforgettable natural terrain trekking setups. Dedicated time for landscape digital photography, bonfire alignments under open starlight sheets, and light group dynamics.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-badge">Day 4</div>
+                            <div class="timeline-panel">
+                                <h4>Traditional Bazaar Discovery & Local Cuisine</h4>
+                                <p>Independent personal schedules allowing tourists to buy souvenirs and explore native food stalls safely, synced with acoustic musical assemblies later at dusk.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-badge">Day 5</div>
+                            <div class="timeline-panel">
+                                <h4>Safe Packing & Departure Management</h4>
+                                <p>Delicious morning buffet routines at the resort desk, quick room inventory settlement handovers, and safe execution return drive back to the city base terminal points.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="servicesPanel" class="inner-tab">
+                    <div class="services-list">
+                        <div class="service-item inclusive"><span class="material-symbols-outlined">check_circle</span> Private Premium AC Transits throughout the grid map locations</div>
+                        <div class="service-item inclusive"><span class="material-symbols-outlined">check_circle</span> Luxury 3-Star Family/Couple Hotel bookings (Standard configurations)</div>
+                        <div class="service-item inclusive"><span class="material-symbols-outlined">check_circle</span> Complete Daily Dual meals (Healthy morning breakfasts & customized grand dinners)</div>
+                        <div class="service-item inclusive"><span class="material-symbols-outlined">check_circle</span> Official documentation, entry passes, and native guide protocols</div>
+                        <div class="service-item exclusive"><span class="material-symbols-outlined">cancel</span> Extras like personal laundry bills, afternoon tea intervals, and custom health insurances</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-sidebar-area">
+                <div class="premium-booking-sidebar-card">
+                    <div class="sidebar-form-title">Secure Booking Desk</div>
+                    
+                    <div class="live-price-box">
+                        <p>Total Estimated Price</p>
+                        <h2 id="liveCalculatedTotal">PKR 45,000</h2>
+                        <small id="singlePersonRate">Rate: PKR 45,000 / Person</small>
+                    </div>
+
+                    <form onsubmit="confirmFinalBooking(event)">
+                        <div class="mb-3">
+                            <label class="form-label-custom">Full Name</label>
+                            <input type="text" class="form-control premium-input-style" placeholder="e.g. Ali Khan" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label-custom">Email Address</label>
+                            <input type="email" class="form-control premium-input-style" placeholder="name@example.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label-custom">Active WhatsApp No</label>
+                            <input type="tel" class="form-control premium-input-style" placeholder="03xx xxxxxxx" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label-custom">Total Seats</label>
+                                <input type="number" id="seatsCountInput" class="form-control premium-input-style" min="1" max="25" value="1" oninput="updateLivePrice()" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label-custom">Target Date</label>
+                                <input type="date" class="form-control premium-input-style" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit-booking">Request Confirmation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Premium database mapping multiple rotating images per each unique location card clicked
+    const tourDatabase = {
+        "maree-summer": { 
+            title: "Maree Summer Tour", price: 45000, duration: "5 Days & 4 Nights", 
+            slides: ["Images/skardu.jpg", "Images/fairyMeadows.jpg", "../Images/itlay.avif"] 
+        },
+        "attabad-lake": { 
+            title: "Hunza & Attabad Lake Tour", price: 55000, duration: "7 Days & 6 Nights", 
+            slides: ["../Images/Attabad Lake.jpg", "../Images/hunza valley.webp", "../Images/fairyMeadows.jpg"] 
+        },
+        "hunza-valley": { 
+            title: "Skardu & Hunza Expedition", price: 65000, duration: "6 Days & 5 Nights", 
+            slides: ["../Images/hunza valley.webp", "../Images/skardu.jpg", "../Images/skardu3.jpg"] 
+        },
+        "fairy-meadows": { 
+            title: "Fairy Meadows Trekking Tour", price: 40000, duration: "4 Days & 3 Nights", 
+            slides: ["../Images/fairyMeadows.jpg", "../Images/skardu3.jpg", "../Images/itlay.avif"] 
+        },
+        "swat-luxury": { 
+            title: "Swat Valley Luxury Trip", price: 48000, duration: "5 Days & 4 Nights", 
+            slides: ["../Images/skardu3.jpg", "../Images/itlay.avif", "../Images/Attabad Lake.jpg"] 
+        },
+        "kumrat-valley": { 
+            title: "Kumrat Valley Wilderness Escape", price: 42000, duration: "5 Days & 4 Nights", 
+            slides: ["../Images/itlay.avif", "../Images/fairyMeadows.jpg", "../Images/hunza valley.webp"] 
+        }
+    };
+
+    let selectedTourRate = 45000;
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tourId = urlParams.get('tour') || 'maree-summer';
+        
+        const selectedTour = tourDatabase[tourId] || tourDatabase["maree-summer"];
+        
+        selectedTourRate = selectedTour.price;
+        document.getElementById('displayTourTitle').innerText = selectedTour.title;
+        document.getElementById('displayDuration').innerText = selectedTour.duration;
+        document.getElementById('singlePersonRate').innerText = `Rate: PKR ${selectedTourRate.toLocaleString()} / Person`;
+        
+        // Dynamically injecting sliding images from the data structure mapping array
+        document.getElementById('slideImg1').src = selectedTour.slides[0];
+        document.getElementById('slideImg2').src = selectedTour.slides[1];
+        document.getElementById('slideImg3').src = selectedTour.slides[2];
+        
+        updateLivePrice();
+        startAutomaticSlider(); // Initializing slider loop
+    });
+
+    // Smart Auto Play Slider Logic (Fades every 3.5 seconds)
+    function startAutomaticSlider() {
+        const slides = document.querySelectorAll('.slide-item');
+        let currentSlideIndex = 0;
+
+        setInterval(() => {
+            slides[currentSlideIndex].classList.remove('active'); // hide old image
+            currentSlideIndex = (currentSlideIndex + 1) % slides.length; // move next pointer index
+            slides[currentSlideIndex].classList.add('active'); // fade in new image smoothly
+        }, 3500); // 3500ms = 3.5 seconds loop interval
+    }
+
+    function updateLivePrice() {
+        const count = parseInt(document.getElementById('seatsCountInput').value) || 1;
+        const total = selectedTourRate * count;
+        document.getElementById('liveCalculatedTotal').innerText = `PKR ${total.toLocaleString()}`;
+    }
+
+    function toggleDetailsTab(evt, panelId) {
+        document.querySelectorAll('.inner-tab').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-trigger').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(panelId).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    function confirmFinalBooking(e) {
+        e.preventDefault();
+        alert("🎯 Booking Request Received! Our active operators will ping you on WhatsApp inside the next 15 minutes.");
+        window.close();
+    }
+</script>
+</body>
+</html>
